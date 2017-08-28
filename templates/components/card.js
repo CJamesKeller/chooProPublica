@@ -1,42 +1,59 @@
 const html = require("choo/html")
 const css = require("sheetify")
-const regular = require("../../store/regular.json")
-const create = require("./create")
 
 const cardStyle = css`
     :host {
         border: 2px solid navy;
         box-shadow: 5px 0 10px 0 rgba(0, 0, 0, 0.3), 0 5px 10px 0 rgba(0, 0, 0, 0.3);
-        margin: 10px;
-        max-width: 40vw;
-        min-width: 20vw;
+        margin-bottom: 20px;
         padding-left: 30px;
         padding-right: 30px;
-        background-color: lightskyblue;
+        background-color: cornsilk;
+        break-inside: avoid;
     }
 `
 const cardWrap = css`
     :host {
-        display: flex;
-        flex-wrap: wrap;
+        column-width: 40vw;
+        padding-right: 20px;
     }
 `
 
 card = (state, emit) => {
-    let data = []
 
-    data = state.expressions
+    let results = state.data
+
     return html`
-        <div class="container ${cardWrap}">
-            ${data.map(expr => {
-                return html`
-                    <div class="${cardStyle}">
-                        <h2>${expr.name}</h2>
-                        <p>${expr.expression}</p>
-                    </div>
-                `
-            })}
-            ${create(state, emit)}
+        <div class="container">
+            <h2>Results:</h2>
+            <div class=${cardWrap}>
+                ${results.map(result => {
+                    let spnsrTtl = result.sponsor_title
+                    spnsrTtl = spnsrTtl.slice(0, spnsrTtl.length - 1)
+
+                    return html`
+                        <div class="${cardStyle}">
+                            <h3>${result.number}</h3>
+                            <h2>${result.title}</h2>
+                            <h3>
+                                Introduced by ${spnsrTtl}. ${result.sponsor_name}
+                                (${result.sponsor_party}, ${result.sponsor_state})
+                                on ${result.introduced_date}
+                            </h3>
+                            <a href=${result.gpo_pdf_uri}>PDF</a>
+                            <span> or </span>
+                            <a href=${result.govtrack_url}>Govtrack</a>
+                            <br />
+                            <h3>Summary:</h3>
+                            <p>${result.summary_short || "(Summary not available)"}</p>
+                            <br />
+                            <h3>Last Major Action:</h3>
+                            <h4>(On ${result.latest_major_action_date})</h4>
+                            <p>${result.latest_major_action}</p>
+                        </div>
+                    `
+                })}
+            </div>
         </div>
     `
 }
